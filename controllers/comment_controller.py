@@ -35,3 +35,4 @@ def delete_comment(comment_id: int):
 
 def get_comments(post_id: int):
     return get_comments_by_post(post_id)
+
