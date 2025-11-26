@@ -8,9 +8,21 @@ Route-Controller-Model 패턴 기반이며 DB 없이 임시 메모리(JSON 구�
 
 
 ### 실행 
+```
 uvicorn main:app --reload  
-http://localhost:8000/docs  
+http://localhost:8000/docs 
+```
 
+<br/>
+
+## [AI] 
+게시글 톤 변환 모델 
+- 원하는 톤을 입력하면 그 톤에 맞게 게시글 톤 변환  
+예시) 사극, 중2병, 전라도 사투리, 유치원생,,,,등등
+```
+- 사용 모델 : ollama-gemma2
+```
+<br/>
 
   
 ## [API Routes 요약]
@@ -46,4 +58,9 @@ http://localhost:8000/docs
 | GET    | `/comments/{post_id}`    | 특정 게시글 댓글 조회 |
 | PUT    | `/comments/{comment_id}` | 댓글 수정        |
 | DELETE | `/comments/{comment_id}` | 댓글 삭제        |
+
+### 5. 게시글 톤 변환 (AI)
+| Method | Endpoint                 | Description  |
+| ------ | ------------------------ | ------------ |
+| POST   | `/ai_tone/convert`       | 게시글 톤 변환  |
 
