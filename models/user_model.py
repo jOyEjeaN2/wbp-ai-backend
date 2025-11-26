@@ -1,5 +1,6 @@
 users = []
 user_id = 1   # 자동 증가 ID
+active_sessions: set[int] = set()
 
 
 def create_user(email, password, nickname, profile_image=None):
@@ -48,3 +49,19 @@ def delete_user_data(uid: int):
         users.remove(user)
         return True
     return False
+
+
+def add_login_session(uid: int):
+    active_sessions.add(uid)
+    return True
+
+
+def remove_login_session(uid: int):
+    if uid in active_sessions:
+        active_sessions.remove(uid)
+        return True
+    return False
+
+
+def is_logged_in(uid: int):
+    return uid in active_sessions
