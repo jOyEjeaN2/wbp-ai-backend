@@ -4,7 +4,31 @@ Route-Controller-Model 패턴 기반이며 DB 없이 임시 메모리(JSON 구�
 
 ### 구조 
 
-<img width="342" height="497" alt="Screenshot 2025-11-19 at 7 26 58 PM" src="https://github.com/user-attachments/assets/d241bc73-77de-44e6-9a50-f06a21f0f3e4" />
+```
+project/
+│
+├─ main.py
+│
+├─ models/
+│  ├─ user_model.py
+│  ├─ post_model.py
+│  ├─ comment_model.py
+│  └─ ai_model.py
+│
+├─ controllers/
+│  ├─ auth_controller.py
+│  ├─ user_controller.py
+│  ├─ post_controller.py
+│  ├─ comment_controller.py
+│  └─ ai_controller.py
+│
+└─ routers/
+   ├─ auth_route.py
+   ├─ user_route.py
+   ├─ post_route.py
+   ├─ comment_route.py
+   └─ ai_route.py
+```
 
 
 ### 실행 
