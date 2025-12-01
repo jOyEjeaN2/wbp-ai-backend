@@ -10,7 +10,14 @@ from models.user_model import (
 )
 
 
-def update_profile(db: Session, user_id: int, nickname: str):
+def update_profile(db: Session, user_id: int, current_user_id: int,  nickname: str):
+    print(f"👉 요청한 ID: {user_id} (타입: {type(user_id)})")
+    print(f"👉 로그인 ID: {current_user_id} (타입: {type(current_user_id)})")
+    print(f"👉 일치 여부: {user_id == current_user_id}")
+
+    if user_id != current_user_id:
+        raise HTTPException(403, "수정 권한이 없습니다.")
+
     if not nickname:
         raise HTTPException(400, "닉네임을 입력해주세요")
 
@@ -31,7 +38,10 @@ def update_profile(db: Session, user_id: int, nickname: str):
     raise HTTPException(404, "유저를 찾을 수 없습니다.")
 
 
-def update_password(db:Session, user_id: int, password: str, password_confirm: str):
+def update_password(db:Session, user_id: int, current_user_id: int, password: str, password_confirm: str):
+    if user_id != current_user_id:
+        raise HTTPException(403, "수정 권한이 없습니다.")
+
     if not password or not password_confirm:
         raise HTTPException(400, "비밀번호를 입력해주세요")
 
@@ -53,7 +63,10 @@ def logout():
     return {"message": "로그아웃 완료"}
 
 
-def delete_user(db:Session, user_id: int):
+def delete_user(db:Session, user_id: int, current_user_id: int):
+    if user_id != current_user_id:
+        raise HTTPException(403, "수정 권한이 없습니다.")
+
     if delete_user_data(db, user_id):
         return {"message": "회원탈퇴 완료"}
 

@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 import re
+from utils.jwt_utils import create_access_token
 
 from models.user_model import (
     create_user,
@@ -53,14 +54,19 @@ def login(db: Session, email: str, password: str):
     if not user or not user.verify_password(password):
         raise HTTPException(400, "아이디 또는 비밀번호를 확인해주세요")
 
-    add_login_session(user.id)
+    access_token = create_access_token(data={"sub": str(user.id)})
 
-    return {"message": "로그인 성공", "user_id": user.id}
+    return {
+        "message": "로그인 성공",
+        "user_id": user.id,
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
 
 
 def logout(user_id: int):
-    if not is_logged_in():
-        raise HTTPException(400, "이미 로그아웃 상태입니다.")
-
-    remove_login_session(user_id)
+    # if not is_logged_in(user_id):
+    #     raise HTTPException(400, "이미 로그아웃 상태입니다.")
+    #
+    # remove_login_session(user_id)
     return {"message" : "로그아웃 성공"}

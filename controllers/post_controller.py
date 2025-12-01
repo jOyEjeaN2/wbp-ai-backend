@@ -9,14 +9,14 @@ from models.post_model import (
 from models.comment_model import Comment
 
 
-def create_post(db: Session, data):
+def create_post(db: Session, author_id:int, data):
     if not data.title or not data.content:
         raise HTTPException(400, "제목, 내용을 모두 작성해주세요")
 
     if len(data.title) > 26:
         raise HTTPException(400, "제목 최대 26자")
 
-    new_post = create_post_data(db, data.author_id, data.title, data.content,  data.image)
+    new_post = create_post_data(db, author_id, data.title, data.content,  data.image)
     return {"message": "게시글 등록 완료", "post": new_post}
 
 
@@ -64,7 +64,9 @@ def get_post_detail(db: Session, post_id: int):
     }
 
 
-def update_post(db: Session, post_id: int, data):
+def update_post(db: Session, post_id: int, author_id:int, data):
+    post = db.query(Post).filter(Post.id == post_id).first()
+
     if len(data.title) > 26:
         raise HTTPException(400, "제목 최대 26자")
 
@@ -74,6 +76,9 @@ def update_post(db: Session, post_id: int, data):
 
     raise HTTPException(404, "게시글을 찾을 수 없습니다")
 
+    if post.author_id != author_id:
+        raise HTTPException(403, "수정 권한이 없습니다.")
+
 
 def delete_post(db: Session, post_id: int):
     if delete_post_data(db, post_id):
@@ -81,8 +86,10 @@ def delete_post(db: Session, post_id: int):
 
     raise HTTPException(404, "게시글을 찾을 수 없습니다")
 
+    if post.author_id != author_id:
+        raise HTTPException(403, "삭제 권한이 없습니다.")
 
-def toggle_like(db: Session, post_id: int):
+def toggle_like(db: Session, post_id: int, current_user_id: int):
     post = db.query(Post).filter(Post.id == post_id).first()
     if not post:
         raise HTTPException(404, "게시글을 찾을 수 없습니다")
