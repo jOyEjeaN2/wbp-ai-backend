@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from database import get_db
 from pydantic import BaseModel
 from controllers.post_controller import (
     get_posts,
@@ -17,6 +19,7 @@ class PostCreate(BaseModel):
     title: str
     content: str
     image : str | None = None
+    author_id : int
 
 class PostUpdate(BaseModel):
     title: str
@@ -25,35 +28,35 @@ class PostUpdate(BaseModel):
 
 # 게시글 목록 조회
 @router.get("")
-def get_posts_route():
-    return get_posts()
+def get_posts_route(page:int=1, size: int=10, db:Session = Depends(get_db)):
+    return get_posts(db, page, size)
 
 
 # 게시글 생성
 @router.post("")
-def create_post_route(body: PostCreate):
-    return create_post(body)
+def create_post_route(body: PostCreate, db:Session = Depends(get_db)):
+    return create_post(db, body)
 
 
 # 게시글 상세 조회
 @router.get("/{post_id}")
-def get_post_detail_route(post_id: int):
-    return get_post_detail(post_id)
+def get_post_detail_route(post_id: int, db:Session = Depends(get_db)):
+    return get_post_detail(db, post_id)
 
 
 # 게시글 수정
 @router.put("/{post_id}")
-def update_post_route(post_id: int, body: PostUpdate):
-    return update_post(post_id, body)
+def update_post_route(post_id: int, body: PostUpdate, db:Session = Depends(get_db)):
+    return update_post(db, post_id, body)
 
 
 # 게시글 삭제
 @router.delete("/{post_id}")
-def delete_post_route(post_id: int):
-    return delete_post(post_id)
+def delete_post_route(post_id: int, db:Session = Depends(get_db)):
+    return delete_post(db, post_id)
 
 
 # 좋아요 토글
 @router.post("/{post_id}/like")
-def toggle_like_route(post_id: int):
-    return toggle_like(post_id)
+def toggle_like_route(post_id: int, db:Session = Depends(get_db)):
+    return toggle_like(db, post_id)
