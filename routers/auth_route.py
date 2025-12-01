@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from controllers.auth_controller import signup, login, logout
+
+from sqlalchemy.orm import Session
+from database import get_db
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -23,13 +26,13 @@ class LogoutReq(BaseModel):
 
 
 @router.post("/signup")
-def signup_route(body: SignupReq):
-    return signup(body.email, body.password, body.password_confirm, body.nickname, body.profile_image)
+def signup_route(body: SignupReq, db:Session = Depends(get_db)):
+    return signup(db, body.email, body.password, body.password_confirm, body.nickname, body.profile_image)
 
 
 @router.post("/login")
-def login_route(body: LoginReq):
-    return login(body.email, body.password)
+def login_route(body: LoginReq, db:Session = Depends(get_db)):
+    return login(db, body.email, body.password)
 
 
 @router.post("/logout")

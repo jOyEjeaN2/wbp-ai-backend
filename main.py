@@ -1,11 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from database import engine, Base
+from models import user_model, post_model, comment_model
+
 from routers.auth_route import router as auth_router
 from routers.user_route import router as user_router
 from routers.post_route import router as post_router
 from routers.comment_route import router as comment_router
 from routers.ai_route import router as ai_router
+
+Base.metadata.create_all(bind = engine)
 
 app = FastAPI(
     title="Community API",
