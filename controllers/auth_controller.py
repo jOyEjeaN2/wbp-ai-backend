@@ -47,7 +47,10 @@ def login(db: Session, email: str, password: str):
 
     user = db.query(User).filter(User.email == email).first()
 
-    if not user or user.verify_password(password):
+    print(f"로그인 시도 이메일: {email}")
+    print(f"DB에서 찾은 유저: {user}")
+
+    if not user or not user.verify_password(password):
         raise HTTPException(400, "아이디 또는 비밀번호를 확인해주세요")
 
     add_login_session(user.id)

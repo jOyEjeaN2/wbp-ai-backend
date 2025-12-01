@@ -16,12 +16,12 @@ def create_post(db: Session, data):
     if len(data.title) > 26:
         raise HTTPException(400, "제목 최대 26자")
 
-    new_post = create_post_data(db, data.title, data.content, data.image)
+    new_post = create_post_data(db, data.author_id, data.title, data.content,  data.image)
     return {"message": "게시글 등록 완료", "post": new_post}
 
 
 def get_posts(db: Session, page: int = 1, size: int = 10):
-    start = (page - 1) * size
+    offset = (page - 1) * size
 
     posts = db.query(Post).order_by(Post.created_at.desc()).offset(offset).limit(size).all()
 
@@ -50,8 +50,18 @@ def get_post_detail(db: Session, post_id: int):
 
     post.views += 1
     db.commit()
+    db.refresh(post)
 
-    return post
+    return {
+        "id": post.id,
+        "title": post.title,
+        "content": post.content,
+        "image": post.image,
+        "views": post.views,
+        "likes": post.likes,
+        "author_id": post.author_id,
+        "created_at": post.created_at
+    }
 
 
 def update_post(db: Session, post_id: int, data):

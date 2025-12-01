@@ -12,7 +12,7 @@ class Post(Base):
     author_id = Column(Integer, ForeignKey("users.id"))
     title = Column(String, nullable = False)
     content = Column(String, nullable = False)
-    image = Column(String, nullable = False)
+    image = Column(String, nullable = True)
     created_at = Column(DateTime, default = datetime.now)
     views = Column(Integer, default = 0)
     likes = Column(Integer, default = 0)
