@@ -1,40 +1,51 @@
-comments = []
-comment_id = 1
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import Session, relationship
+from datetime import datetime
+from database import Base
 
+# DB 테이블 정의
+class Comment(Base):
+    __tablename__ = "comments"
 
-def create_comment(post_id, content):
-    global comment_id
+    id = Column(Integer, primary_key = True, index = True)
+    post_id = Column(Integer, ForeignKey('posts.id'))
+    author_id = Column(Integer, ForeignKey('users.id'))
+    content = Column(String, nullable = False)
+    created_at = Column(DateTime, default = datetime.now)
 
-    new_comment = {
-        "id": comment_id,
-        "post_id": post_id,
-        "content": content
-    }
-
-    comments.append(new_comment)
-    comment_id += 1
+def create_comment(db: Session, post_id: int, author_id: int, content: str):
+    new_comment = Comment(
+        post_id = post_id,
+        author_id = author_id,
+        content = content
+    )
+    db.add(new_comment)
+    db.commit()
+    db.refresh(new_comment)
     return new_comment
 
-
-def get_comments_by_post(post_id: int):
-    return [c for c in comments if c["post_id"] == post_id]
-
-
-def get_comment_by_id(cid: int):
-    return next((c for c in comments if c["id"] == cid), None)
+def get_comments_by_post(db: Session, post_id: int):
+    return db.query(Comment).filter(Comment.post_id == post_id).all()
 
 
-def update_comment_data(cid: int, content: str):
-    comment = get_comment_by_id(cid)
+def get_comment_by_id(db: Session, cid: int):
+    return db.query(Comment).filter(Comment.id == cid).first()
+
+
+def update_comment_data(db: Session, cid: int, content: str):
+    comment = get_comment_by_id(db, cid)
     if comment:
-        comment["content"] = content
+        comment.content = content
+        db.commit()
+        db.refresh(comment)
         return comment
     return None
 
 
-def delete_comment_data(cid: int):
-    comment = get_comment_by_id(cid)
+def delete_comment_data(db: Session, cid: int):
+    comment = get_comment_by_id(db, cid)
     if comment:
-        comments.remove(comment)
+        db.delete(comment)
+        db.commit()
         return True
     return False

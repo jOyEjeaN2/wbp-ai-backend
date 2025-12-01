@@ -1,43 +1,58 @@
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import Session, relationship
+from datetime import datetime
+from database import Base
 from datetime import datetime
 
-posts = []
-post_id = 1
+# DB 테이블 정의
+class Post(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key = True, index = True)
+    author_id = Column(Integer, ForeignKey("users.id"))
+    title = Column(String, nullable = False)
+    content = Column(String, nullable = False)
+    image = Column(String, nullable = False)
+    created_at = Column(DateTime, default = datetime.now)
+    views = Column(Integer, default = 0)
+    likes = Column(Integer, default = 0)
 
 
-def create_post_data(title, content, image):
-    global post_id
+def create_post_data(db:Session, author_id, title, content, image= None):
 
-    new_post = {
-        "id": post_id,
-        "title": title,
-        "content": content,
-        "image": image,
-        "created_at": datetime.now().isoformat(),
-        "views": 0,
-        "likes": 0
-    }
-
-    posts.append(new_post)
-    post_id += 1
+    new_post = Post(
+        author_id = author_id,
+        title = title,
+        content = content,
+        image = image
+    )
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
     return new_post
 
+# 최신순 정렬
+def get_post_data(db:Session, skip: int = 0, limit: int=10):
+    return db.query(Post).order_by(Post.created_at.desc()).offset(skip).limit(limit).all()
 
-def get_post_by_id(pid: int):
-    return next((p for p in posts if p["id"] == pid), None)
+def get_post_by_id(db:Session, pid:int):
+    return db.query(Post).filter(Post.id == pid).first()
 
-
-def update_post_data(pid: int, title, content):
-    post = get_post_by_id(pid)
+def update_post_data(db:Session, pid: int, title, content):
+    post = get_post_by_id(db, pid)
     if post:
-        post["title"] = title
-        post["content"] = content
+        post.title = title
+        post.content = content
+        db.commit()
+        db.refresh(post)
         return post
     return None
 
 
-def delete_post_data(pid: int):
-    post = get_post_by_id(pid)
+def delete_post_data(db:Session, pid: int):
+    post = get_post_by_id(db, pid)
     if post:
-        posts.remove(post)
+        db.delete(post)
+        db.commit()
         return True
     return False

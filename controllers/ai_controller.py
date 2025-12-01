@@ -19,7 +19,6 @@ class AIController:
         elif "전라도 사투리" in request.tone:
             examples="""
             [예시]
-            입력: 안녕하세요. -> 출력: 안녕하세요이~
             입력: 뭐하냐? -> 출력: 뭣허냐? 
             입력: 미치겠네 -> 출력: 미쳐블겄네
             입력: 난 이런거 못해 -> 출력: 난 이런거 모대
@@ -61,7 +60,7 @@ class AIController:
                 converted_text = converted_text[1:-1]
 
             return ToneResponse(
-                original_text=converted_text,
+                original_text=request.text,
                 converted_text=converted_text,
                 tone_used=request.tone
             )
