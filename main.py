@@ -10,6 +10,9 @@ from routers.post_route import router as post_router
 from routers.comment_route import router as comment_router
 from routers.ai_route import router as ai_router
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 Base.metadata.create_all(bind = engine)
 
 app = FastAPI(
@@ -26,8 +29,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(post_router)
 app.include_router(comment_router)
 app.include_router(ai_router)
+
+@app.get("/")
+async def read_index():
+    return FileResponse("static/index.html")

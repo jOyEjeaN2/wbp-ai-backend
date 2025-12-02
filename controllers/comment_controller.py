@@ -8,6 +8,7 @@ from models.comment_model import (
     get_comment_by_id
 )
 
+from models.user_model import User
 
 def add_comment(db: Session, post_id: int, author_id: int, content: str):
     if not content:
@@ -19,6 +20,8 @@ def add_comment(db: Session, post_id: int, author_id: int, content: str):
     comment_dict = comment.__dict__.copy()
     comment_dict.pop('_sa_instance_state', None)
 
+    author = db.query(User).filter(User.id == author_id).first()
+    comment_dict["author_nickname"] = author.nickname if author else "알 수 없음"
     return {"message": "댓글 등록 완료", "comment": comment}
 
 
@@ -61,6 +64,9 @@ def get_comments(db: Session, post_id: int):
     for comment in comments:
         comment_dict = comment.__dict__.copy()
         comment_dict.pop('_sa_instance_state', None)
+
+        author = db.query(User).filter(User.id == comment.author_id).first()
+        comment_dict["author_nickname"] = author.nickname if author else "알 수 없음"
         result.append(comment_dict)
 
     return result

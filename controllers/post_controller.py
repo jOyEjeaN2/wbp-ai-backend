@@ -7,6 +7,7 @@ from models.post_model import (
     Post
 )
 from models.comment_model import Comment
+from models.user_model import User
 
 
 def create_post(db: Session, author_id:int, data):
@@ -29,12 +30,16 @@ def get_posts(db: Session, page: int = 1, size: int = 10):
     for post in posts:
         comment_count = db.query(Comment).filter(Comment.post_id == post.id).count()
 
+        author = db.query(User).filter(User.id == post.author_id).first()
+        author_nickname = author.nickname if author else "알 수 없음"
+
         result.append({
             "id": post.id,
             "title": post.title,
             "views": post.views,
             "likes": post.likes,
             "author_id" : post.author_id,
+            "author_nickname": author_nickname,
             "created_at": post.created_at,
             "comments_count": comment_count,
         })
@@ -52,6 +57,9 @@ def get_post_detail(db: Session, post_id: int):
     db.commit()
     db.refresh(post)
 
+    author = db.query(User).filter(User.id == post.author_id).first()
+    author_nickname = author.nickname if author else "알 수 없음"
+
     return {
         "id": post.id,
         "title": post.title,
@@ -60,6 +68,7 @@ def get_post_detail(db: Session, post_id: int):
         "views": post.views,
         "likes": post.likes,
         "author_id": post.author_id,
+        "author_nickname": author_nickname,
         "created_at": post.created_at
     }
 
@@ -80,17 +89,24 @@ def update_post(db: Session, post_id: int, author_id:int, data):
         raise HTTPException(403, "수정 권한이 없습니다.")
 
 
-def delete_post(db: Session, post_id: int):
+def delete_post(db: Session, post_id: int, author_id:int):
+    post = db.query(Post).filter(Post.id == post_id).first()
+
+    if not post:
+        raise HTTPException(404, "게시글을 찾을 수 없습니다.")
+
+    if post.author_id != author_id:
+        raise HTTPException(403, "삭제 권한이 없습니다.")
+
     if delete_post_data(db, post_id):
         return {"message": "게시글 삭제 완료"}
 
     raise HTTPException(404, "게시글을 찾을 수 없습니다")
 
-    if post.author_id != author_id:
-        raise HTTPException(403, "삭제 권한이 없습니다.")
 
 def toggle_like(db: Session, post_id: int, current_user_id: int):
     post = db.query(Post).filter(Post.id == post_id).first()
+
     if not post:
         raise HTTPException(404, "게시글을 찾을 수 없습니다")
 

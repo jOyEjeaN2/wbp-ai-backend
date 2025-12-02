@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from database import get_db
 from pydantic import BaseModel
@@ -27,8 +27,14 @@ def update_profile_route(user_id: int, body: ProfileUpdate, db:Session = Depends
 
 # 비밀번호 수정
 @router.put("/{user_id}/password")
-def update_password_route(user_id: int, body: PasswordUpdate, db:Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
-    return update_password(db, user_id, current_user_id, body.password, body.confirm_password)
+def update_password_route(
+        user_id: int,
+        body: PasswordUpdate,
+        db:Session = Depends(get_db),
+        current_user_id: int = Depends(get_current_user_id),
+        profile_image: UploadFile = File(None)
+):
+    return update_password(db, user_id, current_user_id, body.password, body.confirm_password,profile_image)
 
 
 @router.post("/logout")

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 커뮤니티</title>
+    <!-- 폰트: 깔끔한 Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 기본 디자인 (스크린샷 스타일) --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8f9fa; color: #333; line-height: 1.6; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* 헤더 */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #007bff; /* 파란색 로고 */
+            cursor: pointer;
+        }
+
+        /* 네비게이션 & 프로필 영역 */
+        .nav-buttons { display: flex; align-items: center; }
+        .nav-buttons button {
+            margin-left: 10px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .btn-login { background-color: #007bff; color: white; }
+        .btn-login:hover { background-color: #0056b3; }
+        .btn-logout { background-color: #e9ecef; color: #495057; }
+        .btn-logout:hover { background-color: #dee2e6; }
+
+        /* [기능 추가] 프로필 이미지 및 드롭다운 스타일 */
+        .profile-container { position: relative; margin-left: 15px; cursor: pointer; }
+        .profile-img-header {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            transition: border-color 0.2s;
+        }
+        .profile-img-header:hover { border-color: #007bff; }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px; right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 180px;
+            overflow: hidden;
+            border: 1px solid #eee;
+            flex-direction: column;
+            z-index: 200;
+        }
+        .dropdown-menu.show { display: flex; }
+        .dropdown-item {
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: left;
+            border: none;
+            background: none;
+            width: 100%;
+            display: block;
+            color: #333;
+        }
+        .dropdown-item:hover { background-color: #f8f9fa; color: #007bff; }
+        .dropdown-divider { border-top: 1px solid #eee; margin: 0; }
+
+        /* 메인 컨텐츠 */
+        main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+
+        /* 글쓰기 버튼 (초록색) */
+        .action-bar { display: flex; justify-content: flex-end; margin-bottom: 1.5rem; }
+        .btn-write {
+            background-color: #28a745; /* 초록색 버튼 */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+            transition: transform 0.2s;
+        }
+        .btn-write:hover {
+            transform: translateY(-2px);
+            background-color: #218838;
+        }
+
+        /* 게시글 카드 */
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .post-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .post-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .post-content { color: #666; font-size: 0.95rem; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .post-meta { display: flex; gap: 15px; color: #adb5bd; font-size: 0.85rem; align-items: center; }
+        .post-author { font-weight: bold; color: #555; display: flex; align-items: center; gap: 5px; }
+        .post-author-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+
+        /* 모달 공통 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-btn { position: absolute; top: 15px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .form-input, .form-textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; }
+        .form-textarea { height: 150px; resize: none; }
+        .btn-submit { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+
+        /* [기능 추가] 프로필 수정 모달 스타일 */
+        .profile-edit-header { text-align: center; margin-bottom: 2rem; }
+        .profile-img-large {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eee;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .profile-img-large:hover { opacity: 0.8; }
+        .profile-email { color: #888; font-size: 0.9rem; margin-bottom: 5px; }
+        .img-upload-hint { font-size: 0.8rem; color: #aaa; }
+
+        /* 상세보기 스타일 */
+        .detail-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+        .detail-info { color: #888; font-size: 0.9rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .detail-body { font-size: 1rem; line-height: 1.6; min-height: 100px; margin-bottom: 2rem; white-space: pre-wrap; }
+        .detail-actions { display: flex; gap: 10px; margin-bottom: 2rem; justify-content: center; }
+        .btn-like { background: #ff4757; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* 댓글 스타일 */
+        .comment-section { background: #f8f9fa; padding: 1rem; border-radius: 8px; }
+        .comment-header-text { font-weight: bold; margin-bottom: 10px; color: #555; }
+        .comment-input-box { display: flex; gap: 10px; margin-bottom: 1rem; }
+        .comment-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-comment { background: #333; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; }
+        .comment-list { display: flex; flex-direction: column; gap: 10px; }
+
+        /* 댓글 아이템 스타일 */
+        .comment-item { background: white; padding: 12px; border-radius: 8px; border: 1px solid #eee; }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.85rem; }
+        .comment-author { font-weight: 700; color: #333; }
+        .comment-date { color: #aaa; margin-left: 8px; }
+        .comment-body { color: #555; font-size: 0.95rem; }
+        .btn-del-comment { color: #dc3545; cursor: pointer; font-size: 0.8rem; }
+
+        /* AI 툴바 */
+        .ai-toolbar { background: #f1f8ff; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center; }
+        .ai-select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        .btn-ai { background: #6f42c1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- 헤더 -->
+    <header>
+        <div class="logo" onclick="location.reload()">🚀 AI Community</div>
+        <div class="nav-buttons" id="navButtons">
+            <!-- 로그인 상태에 따라 JS로 채워짐 -->
+        </div>
+    </header>
+
+    <!-- 메인 -->
+    <main>
+        <div class="action-bar">
+            <button class="btn-write" onclick="openWriteModal()">✏️ 새 글 쓰기</button>
+        </div>
+        <div id="postList">
+            <div style="text-align:center; padding: 2rem; color:#888;">게시글을 불러오는 중...</div>
+        </div>
+    </main>
+
+    <!-- 1. 로그인 모달 -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+            <h2 style="text-align:center; margin-bottom:20px;">로그인</h2>
+            <input type="email" id="loginEmail" class="form-input" placeholder="이메일">
+            <input type="password" id="loginPassword" class="form-input" placeholder="비밀번호">
+            <button class="btn-submit" onclick="login()">로그인하기</button>
+        </div>
+    </div>
+
+    <!-- 2. 회원가입 모달 -->
+    <div id="signupModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('signupModal')">&times;</span>
+            <h2 style="text-align:center; margin-bottom:20px;">회원가입</h2>
+            <input type="email" id="signupEmail" class="form-input" placeholder="이메일">
+            <input type="text" id="signupNickname" class="form-input" placeholder="닉네임">
+            <input type="password" id="signupPassword" class="form-input" placeholder="비밀번호">
+            <input type="password" id="signupConfirm" class="form-input" placeholder="비밀번호 확인">
+            <button class="btn-submit" onclick="signup()">가입하기</button>
+        </div>
+    </div>
+
+    <!-- 3. 회원정보 수정 모달 (프로필 이미지 포함) -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('profileModal')">&times;</span>
+            <div class="profile-edit-header">
+                <!-- 이미지 클릭 시 파일 업로드 트리거 (현재는 미리보기만 구현) -->
+                <img src="https://via.placeholder.com/100" id="profileImgPreview" class="profile-img-large" onclick="document.getElementById('profileImgInput').click()">
+                <input type="file" id="profileImgInput" style="display:none;" accept="image/*" onchange="previewImage(this)">
+                <div class="img-upload-hint">이미지를 클릭하여 변경</div>
+                <div id="displayEmail" class="profile-email">user@example.com</div>
+            </div>
+
+            <label style="font-weight:bold;">닉네임</label>
+            <input type="text" id="editNickname" class="form-input" placeholder="닉네임">
+            <button class="btn-submit" onclick="updateProfile()">정보 수정 완료</button>
+        </div>
+    </div>
+
+    <!-- 4. 비밀번호 변경 모달 -->
+    <div id="passwordModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('passwordModal')">&times;</span>
+            <h2 style="text-align:center; margin-bottom:20px;">비밀번호 변경</h2>
+            <input type="password" id="newPassword" class="form-input" placeholder="새 비밀번호">
+            <input type="password" id="confirmPassword" class="form-input" placeholder="비밀번호 확인">
+            <button class="btn-submit" onclick="updatePassword()">변경하기</button>
+        </div>
+    </div>
+
+    <!-- 5. 글쓰기 모달 -->
+    <div id="writeModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('writeModal')">&times;</span>
+            <h2 style="text-align:center; margin-bottom:15px;">게시글 작성</h2>
+            <input type="text" id="postTitle" class="form-input" placeholder="제목을 입력하세요">
+
+            <div class="ai-toolbar">
+                <span>🤖 AI 톤 변환:</span>
+                <select id="toneSelect" class="ai-select">
+                    <option value="사극">사극</option>
+                    <option value="중2병">중2병</option>
+                    <option value="전라도 사투리">전라도 사투리</option>
+                    <option value="유치원생">유치원생</option>
+                </select>
+                <button class="btn-ai" onclick="convertAI()">변환 적용</button>
+            </div>
+
+            <textarea id="postContent" class="form-textarea" placeholder="내용을 자유롭게 작성하세요"></textarea>
+            <button class="btn-submit" onclick="createPost()">등록하기</button>
+        </div>
+    </div>
+
+    <!-- 6. 상세 모달 -->
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('detailModal')">&times;</span>
+
+            <h2 id="dTitle" class="detail-title">제목</h2>
+            <div class="detail-info">
+                <span id="dAuthor" style="font-weight:bold; margin-right:10px;">작성자</span>
+                <span id="dDate">날짜</span>
+                <span id="dViews" style="margin-left:10px;">조회수 0</span>
+            </div>
+            <div id="dContent" class="detail-body">내용</div>
+
+            <div class="detail-actions">
+                <button class="btn-like" onclick="toggleLike()">
+                    ❤️ 좋아요 <span id="dLikes">0</span>
+                </button>
+                <button class="btn-logout" id="btnDeletePost" style="display:none;" onclick="deletePost()">삭제</button>
+            </div>
+
+            <div class="comment-section">
+                <div class="comment-header-text">댓글</div>
+                <div class="comment-input-box">
+                    <input type="text" id="commentInput" class="comment-input" placeholder="댓글을 남겨보세요">
+                    <button class="btn-comment" onclick="addComment()">등록</button>
+                </div>
+                <div id="commentList" class="comment-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+        const DEFAULT_PROFILE_IMG = "https://via.placeholder.com/40";
+
+        let userToken = localStorage.getItem("access_token");
+        let userId = localStorage.getItem("user_id");
+        let userEmail = localStorage.getItem("user_email");
+        let userNickname = localStorage.getItem("user_nickname");
+        let currentPostId = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateNav();
+            loadPosts();
+
+            // 드롭다운 외부 클릭 시 닫기
+            document.addEventListener('click', function(event) {
+                const profileContainer = document.querySelector('.profile-container');
+                const dropdown = document.querySelector('.dropdown-menu');
+                if (dropdown && profileContainer && !profileContainer.contains(event.target)) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
+
+        // --- 공통 UI ---
+        function updateNav() {
+            const nav = document.getElementById("navButtons");
+            if (userToken) {
+                nav.innerHTML = `
+                    <div class="profile-container" onclick="toggleDropdown()">
+                        <img src="${DEFAULT_PROFILE_IMG}" class="profile-img-header" alt="Profile">
+                        <div class="dropdown-menu" id="profileDropdown">
+                            <div style="padding:12px 16px; color:#999; font-size:0.8rem;">${userEmail || '로그인 계정'}</div>
+                            <hr class="dropdown-divider">
+                            <button class="dropdown-item" onclick="openProfileModal()">회원정보 수정</button>
+                            <button class="dropdown-item" onclick="openModal('passwordModal')">비밀번호 수정</button>
+                            <hr class="dropdown-divider">
+                            <button class="dropdown-item" style="color:red;" onclick="logout()">로그아웃</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                nav.innerHTML = `
+                    <button class="btn-login" onclick="openModal('loginModal')">로그인</button>
+                    <button class="btn-logout" onclick="openModal('signupModal')">회원가입</button>
+                `;
+            }
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById("profileDropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        function openModal(id) {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none');
+            document.getElementById(id).style.display = 'flex';
+        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function openProfileModal() {
+            document.getElementById("displayEmail").innerText = userEmail || "이메일 정보 없음";
+            document.getElementById("editNickname").value = userNickname || "";
+            document.getElementById("profileImgPreview").src = DEFAULT_PROFILE_IMG;
+            openModal('profileModal');
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImgPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // --- 1. 목록 조회 ---
+        async function loadPosts() {
+            try {
+                const res = await fetch(`${API_BASE}/posts`);
+                const data = await res.json();
+                const posts = data.posts || data;
+
+                const list = document.getElementById("postList");
+                if(posts.length === 0) {
+                    list.innerHTML = "<div style='text-align:center; padding:2rem;'>작성된 게시글이 없습니다.</div>";
+                    return;
+                }
+
+                list.innerHTML = posts.map(p => `
+                    <div class="post-card" onclick="openDetail(${p.id})">
+                        <div class="post-title">${escapeHtml(p.title)}</div>
+                        <div class="post-content">${escapeHtml(p.content)}</div>
+                        <div class="post-meta">
+                            <div class="post-author">
+                                <img src="${DEFAULT_PROFILE_IMG}" class="post-author-img">
+                                <span>${p.author_nickname || '익명'}</span>
+                            </div>
+                            <span>👀 ${p.views}</span>
+                            <span>❤️ ${p.likes}</span>
+                            <span>💬 ${p.comments_count || 0}</span>
+                            <span>📅 ${new Date(p.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        // --- 2. 상세보기 ---
+        async function openDetail(id) {
+            currentPostId = id;
+            try {
+                const res = await fetch(`${API_BASE}/posts/${id}`);
+                if(!res.ok) throw new Error("로드 실패");
+                const post = await res.json();
+
+                document.getElementById("dTitle").innerText = post.title;
+                document.getElementById("dContent").innerText = post.content;
+                document.getElementById("dAuthor").innerText = `👤 ${post.author_nickname || '익명'}`;
+                document.getElementById("dDate").innerText = new Date(post.created_at).toLocaleString();
+                document.getElementById("dViews").innerText = `조회수 ${post.views}`;
+                document.getElementById("dLikes").innerText = post.likes;
+
+                const delBtn = document.getElementById("btnDeletePost");
+                if (userToken && post.author_id == userId) delBtn.style.display = 'block';
+                else delBtn.style.display = 'none';
+
+                loadComments(id);
+                openModal("detailModal");
+            } catch(e) { alert("글을 불러올 수 없습니다."); }
+        }
+
+        // --- 3. 좋아요 ---
+        async function toggleLike() {
+            if(!userToken) return alert("로그인이 필요합니다.");
+            try {
+                const res = await fetch(`${API_BASE}/posts/${currentPostId}/like`, {
+                    method: "POST", headers: { "Authorization": `Bearer ${userToken}` }
+                });
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById("dLikes").innerText = data.likes;
+                    loadPosts();
+                }
+            } catch(e) {}
+        }
+
+        // --- 4. 게시글 삭제 ---
+        async function deletePost() {
+            if(!confirm("정말 삭제하시겠습니까?")) return;
+            try {
+                const res = await fetch(`${API_BASE}/posts/${currentPostId}`, {
+                    method: "DELETE", headers: { "Authorization": `Bearer ${userToken}` }
+                });
+                if(res.ok) {
+                    alert("삭제되었습니다.");
+                    closeModal("detailModal");
+                    loadPosts();
+                } else {
+                    alert("삭제 권한이 없습니다.");
+                }
+            } catch(e) {}
+        }
+
+        // --- 5. 댓글 관련 ---
+        async function loadComments(postId) {
+            try {
+                const res = await fetch(`${API_BASE}/comments/${postId}`);
+                const comments = await res.json();
+                const list = document.getElementById("commentList");
+
+                if (comments.length === 0) {
+                    list.innerHTML = "<div style='color:#aaa; text-align:center; padding:10px;'>첫 댓글을 남겨보세요!</div>";
+                    return;
+                }
+
+                list.innerHTML = comments.map(c => `
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <div>
+                                <span class="comment-author">👤 ${c.author_nickname || '익명'}</span>
+                                <span class="comment-date">${new Date(c.created_at).toLocaleString()}</span>
+                            </div>
+                            ${userToken ? `<span class="btn-del-comment" onclick="deleteComment(${c.id})">삭제</span>` : ''}
+                        </div>
+                        <div class="comment-body">${escapeHtml(c.content)}</div>
+                    </div>
+                `).join('');
+            } catch(e) {}
+        }
+
+        async function addComment() {
+            if(!userToken) return alert("로그인이 필요합니다.");
+            const content = document.getElementById("commentInput").value;
+            if(!content) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/comments/${currentPostId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${userToken}` },
+                    body: JSON.stringify({ content })
+                });
+                if(res.ok) {
+                    document.getElementById("commentInput").value = "";
+                    loadComments(currentPostId);
+                    loadPosts();
+                }
+            } catch(e) { alert("댓글 등록 실패"); }
+        }
+
+        async function deleteComment(cid) {
+            if(!confirm("댓글을 삭제할까요?")) return;
+            try {
+                const res = await fetch(`${API_BASE}/comments/${cid}`, {
+                    method: "DELETE", headers: { "Authorization": `Bearer ${userToken}` }
+                });
+                if(res.ok) loadComments(currentPostId);
+                else alert("본인 댓글만 삭제 가능합니다.");
+            } catch(e) {}
+        }
+
+        // --- 6. 글쓰기 ---
+        function openWriteModal() {
+            if(!userToken) return alert("로그인이 필요한 서비스입니다.");
+            openModal("writeModal");
+        }
+
+        async function createPost() {
+            const title = document.getElementById("postTitle").value;
+            const content = document.getElementById("postContent").value;
+
+            try {
+                const res = await fetch(`${API_BASE}/posts`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${userToken}` },
+                    body: JSON.stringify({ title, content })
+                });
+                if(res.ok) {
+                    alert("게시글이 등록되었습니다!");
+                    closeModal("writeModal");
+                    document.getElementById("postTitle").value = "";
+                    document.getElementById("postContent").value = "";
+                    loadPosts();
+                } else throw new Error();
+            } catch(e) { alert("게시글 등록 중 오류가 발생했습니다."); }
+        }
+
+        // --- 7. AI 변환 ---
+        async function convertAI() {
+            const text = document.getElementById("postContent").value;
+            const tone = document.getElementById("toneSelect").value;
+            if(!text) return alert("변환할 내용을 먼저 작성해주세요!");
+
+            const btn = document.querySelector(".btn-ai");
+            const oldText = btn.innerText;
+            btn.innerText = "변환 중...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/ai_tone/convert`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text, tone })
+                });
+                const data = await res.json();
+                if(data.converted_text) document.getElementById("postContent").value = data.converted_text;
+            } catch(e) { alert("AI 변환 실패"); }
+            finally { btn.innerText = oldText; btn.disabled = false; }
+        }
+
+        // --- 8. 회원정보 관리 ---
+        async function updateProfile() {
+            const nickname = document.getElementById("editNickname").value;
+            if(!nickname) return alert("닉네임을 입력해주세요.");
+
+            if (!userId) {
+                alert("사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/profile`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${userToken}` },
+                    body: JSON.stringify({ nickname })
+                });
+
+                if(res.ok) {
+                    localStorage.setItem("user_nickname", nickname);
+                    userNickname = nickname;
+                    alert("닉네임이 수정되었습니다.");
+                    closeModal("profileModal");
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    const errMsg = typeof err.detail === 'object' ? JSON.stringify(err.detail) : (err.detail || "수정 실패");
+                    alert(errMsg);
+                }
+            } catch(e) {
+                console.error(e);
+                alert("오류 발생");
+            }
+        }
+
+        async function updatePassword() {
+            const password = document.getElementById("newPassword").value;
+            const confirm = document.getElementById("confirmPassword").value;
+            if(!password) return alert("비밀번호를 입력해주세요.");
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}/password`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${userToken}` },
+                    body: JSON.stringify({ password, confirm_password: confirm })
+                });
+                if(res.ok) {
+                    alert("비밀번호가 변경되었습니다.");
+                    closeModal("passwordModal");
+                } else {
+                    const err = await res.json();
+                    alert(err.detail || "변경 실패");
+                }
+            } catch(e) { alert("오류 발생"); }
+        }
+
+        async function deleteUser() {
+            if(!confirm("정말 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.")) return;
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}`, {
+                    method: "DELETE",
+                    headers: { "Authorization": `Bearer ${userToken}` }
+                });
+                if(res.ok) {
+                    alert("회원 탈퇴가 완료되었습니다.");
+                    logout();
+                } else alert("탈퇴 실패");
+            } catch(e) { alert("오류 발생"); }
+        }
+
+        // --- 기타 (로그인/가입) ---
+        async function login() {
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+                if(res.ok) {
+                    const data = await res.json();
+
+                    localStorage.setItem("access_token", data.access_token);
+                    if (data.user_id) {
+                        localStorage.setItem("user_id", data.user_id);
+                        userId = data.user_id;
+                    } else {
+                        alert("로그인 응답 오류: user_id가 없습니다.");
+                        return;
+                    }
+                    localStorage.setItem("user_email", email);
+
+                    userToken = data.access_token;
+                    userEmail = email;
+
+                    updateNav();
+                    closeModal("loginModal");
+                    alert("로그인되었습니다! 👋");
+                } else {
+                    const err = await res.json();
+                    alert(err.detail || "아이디 또는 비밀번호를 확인해주세요.");
+                }
+            } catch(e) {
+                console.error(e);
+                alert("로그인 요청 중 오류가 발생했습니다.");
+            }
+        }
+
+        async function signup() {
+            const email = document.getElementById("signupEmail").value;
+            const nickname = document.getElementById("signupNickname").value;
+            const password = document.getElementById("signupPassword").value;
+            const confirm = document.getElementById("signupConfirm").value;
+            try {
+                const res = await fetch(`${API_BASE}/auth/signup`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, nickname, password, password_confirm: confirm })
+                });
+                if(res.ok) {
+                    alert("가입 완료! 로그인해주세요 🎉"); closeModal("signupModal");
+                } else {
+                    const err = await res.json();
+                    alert(err.detail || "가입 실패");
+                }
+            } catch(e) {}
+        }
+
+        function logout() {
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("user_id");
+            localStorage.removeItem("user_email");
+            localStorage.removeItem("user_nickname");
+            userToken = null;
+            userId = null;
+            userEmail = null;
+            userNickname = null;
+            updateNav();
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none');
+            alert("로그아웃 되었습니다.");
+        }
+
+        function escapeHtml(text) {
+            return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+        }
+    </script>
+</body>
+</html>
