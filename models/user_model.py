@@ -32,7 +32,7 @@ class User(Base):
     email = Column(String, unique=True, index = True, nullable = False)
     password = Column(String, nullable = False)
     nickname = Column(String, unique=True, nullable = False)
-    profile_image = Column(String, nullable = False)
+    profile_image = Column(String, nullable = True)
 
     def verify_password(self, plain_password):
         return pwd_context.verify(plain_password, self.password)
@@ -55,6 +55,7 @@ def create_user(db: Session, email, password, nickname, profile_image=None):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
     return new_user
 
 def get_user_by_email(db: Session, email: str):
