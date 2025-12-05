@@ -3,4 +3,8 @@ pycache/*.pyc
 .idea/
 .env
 .env.*
-*.db*.sqlite3
+*.db
+*.sqlite3
+wbp_db.db
+static/uploads/
+.DS_Store

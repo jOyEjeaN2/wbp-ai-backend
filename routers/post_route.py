@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from database import get_db
 from pydantic import BaseModel
@@ -11,6 +11,7 @@ from controllers.post_controller import (
     toggle_like
 )
 from dependencies.auth_dep import get_current_user_id
+from typing import Optional
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
@@ -34,8 +35,17 @@ def get_posts_route(page:int=1, size: int=10, db:Session = Depends(get_db)):
 
 # 게시글 생성
 @router.post("")
-def create_post_route(body: PostCreate, db:Session = Depends(get_db), current_user_id: int=Depends(get_current_user_id)):
-    return create_post(db, current_user_id, body)
+def create_post_route(
+    title: str = Form(...),
+    content: str = Form(...),
+    image: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+
+    data = PostCreate(title=title, content=content)
+    # 컨트롤러에 인자로 전달
+    return create_post(db, current_user_id, data, image)
 
 
 # 게시글 상세 조회
@@ -46,8 +56,8 @@ def get_post_detail_route(post_id: int, db:Session = Depends(get_db)):
 
 # 게시글 수정
 @router.put("/{post_id}")
-def update_post_route(post_id: int, body: PostUpdate, db:Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id)):
-    return update_post(db, post_id, current_user_id, body)
+def update_post_route(post_id: int, body: PostUpdate, db:Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id), image: Optional[UploadFile] = File(None)):
+    return update_post(db, post_id, current_user_id, body, image)
 
 
 # 게시글 삭제

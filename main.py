@@ -21,6 +21,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
+origins = [
+    "http://localhost:5500",
+    "http://127.0.0.1:8000/",
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,4 +44,4 @@ app.include_router(ai_router)
 
 @app.get("/")
 async def read_index():
-    return FileResponse("static/index.html")
+    return {"message": "Gaver API is running"}
