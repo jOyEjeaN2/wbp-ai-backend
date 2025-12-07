@@ -1,6 +1,13 @@
-## [FastAPI 커뮤니티 백엔드]
-### FastAPI를 기반으로 JWT 인증, SQLite 데이터베이스 연동, AI 톤 변환 기능을 구현한 커뮤니티 백엔드 프로젝트
+## [PawTalk Backend]
+**FastAPI + AI (Ollama)** 기반의 강아지 커뮤니티 백엔드 API 서버  
+JWT 인증, SQLite 데이터베이스 연동, 그리고 LLM을 활용한 톤 변환 기능을 제공
 
+### Tech Stack
+![Python](https://img.shields.io/badge/python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black?style=for-the-badge)
 
 ### [구조] 
 
@@ -38,18 +45,13 @@ project/
 ```
 
 
-### 실행 
-```
-uvicorn main:app --reload  
-http://localhost:8000/docs 
-```
-
-<br/>
-
 ## [AI] 강아지 커뮤니티 전용 글 톤/상담 변환
 
-게시글 내용을 AI가 읽고, 사용자가 선택한 스타일에 맞게 문체를 바꿔주거나  
-훈련사·수의사처럼 설명해주는 기능입니다.
+Ollama를 활용한 On-device LLM이 게시글을 분석하여 원하는 스타일로 변환
+
+### 🤖 사용 모델
+- **Model:** `ollama-gemma3:4b` (On-device LLM)
+- **Engine:** Ollama
 
 ### 지원 모드
 
@@ -64,7 +66,7 @@ http://localhost:8000/docs
 
 | 구분 | 톤(Tone) | 설명 예시 |
 | :--- | :--- | :--- |
-| 재미 | **강아지 시점** | "오늘도 집사 따라 산책 다녀왔개! 간식 더 달라개!" |
+| 재미 | **강아지 시점** | "오늘도 집사 따라 산책 다녀왔다! 간식 더 달라!" |
 | 재미 | **우리집 주인 자랑** | "우리 집사는 산책도 잘 해주고, 간식도 최고로 잘 챙겨줘요." |
 | 재미 | **산책 일기** | "오늘은 강아지 공원까지 다녀왔어요. 새 친구도 만나고 냄새도 잔뜩 맡았어요." |
 | 상담 | **훈련사 설명** | "이 행동은 분리불안의 신호일 수 있어요. 먼저 집을 비울 때 신호를 줄이는 연습부터 해보세요." |
@@ -73,9 +75,13 @@ http://localhost:8000/docs
 사용자는 글을 작성한 뒤, 원하는 톤 프리셋을 선택하거나 직접 톤을 입력해 버튼 한 번으로 변환 결과를 적용할 수 있습니다.
 
 
-### 🤖 사용 모델
-- **Model:** `ollama-gemma3:4b` (On-device LLM)
-- **Engine:** Ollama
+## [실행] 
+```
+uvicorn main:app --reload  
+http://localhost:8000/docs 
+```
+
+<br/>
 
   
 ## [API Routes 요약]
