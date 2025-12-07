@@ -38,7 +38,7 @@ def get_post_data(db:Session, skip: int = 0, limit: int=10):
 def get_post_by_id(db:Session, pid:int):
     return db.query(Post).filter(Post.id == pid).first()
 
-def update_post_data(db:Session, pid: int, title: str, content: str, image:str = None):
+def update_post_data(db:Session, pid: int, title, content, image = None):
     post = get_post_by_id(db, pid)
     if post:
         post.title = title

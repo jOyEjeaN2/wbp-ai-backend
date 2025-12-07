@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile, Form
+from fastapi import APIRouter, Depends, File, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from database import get_db
 from pydantic import BaseModel
@@ -56,8 +56,15 @@ def get_post_detail_route(post_id: int, db:Session = Depends(get_db)):
 
 # 게시글 수정
 @router.put("/{post_id}")
-def update_post_route(post_id: int, body: PostUpdate, db:Session = Depends(get_db), current_user_id: int = Depends(get_current_user_id), image: Optional[UploadFile] = File(None)):
-    return update_post(db, post_id, current_user_id, body, image)
+def update_post_route(
+    post_id: int,
+    title: str = Form(...),
+    content: str = Form(...),
+    image: UploadFile = File(None),
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    return update_post(db, post_id, current_user_id, title, content, image)
 
 
 # 게시글 삭제

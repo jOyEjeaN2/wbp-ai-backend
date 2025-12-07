@@ -1,4 +1,4 @@
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from models.post_model import (
     create_post_data,
@@ -90,30 +90,35 @@ def get_post_detail(db: Session, post_id: int):
     }
 
 
-def update_post(db: Session, post_id: int, author_id:int, data, image:Optional[UploadFile] = None):
+def update_post(db: Session, post_id: int, author_id: int, title: str, content: str, image: UploadFile = None):
     post = db.query(Post).filter(Post.id == post_id).first()
 
     if not post:
-        raise HTTPException(404, "게시글을 찾을 수 없습니다.")
+        raise HTTPException(404, "게시글을 찾을 수 없습니다")
 
     if post.author_id != author_id:
         raise HTTPException(403, "수정 권한이 없습니다.")
 
-    if len(data.title) > 26:
+    if len(title) > 26:
         raise HTTPException(400, "제목 최대 26자")
 
+    # 이미지 저장 로직
     image_url = None
-
     if image and image.filename:
+        UPLOAD_DIR = "static/uploads"
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+
         filename = f"post_{post_id}_{image.filename}"
         file_path = os.path.join(UPLOAD_DIR, filename)
 
-        with open(file_path,"wb") as buffer:
+        with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 
-        image_url = f"/{UPLOAD_DIR}/{filename}".replace("\\","/")
+        image_url = f"/{UPLOAD_DIR}/{filename}".replace("\\", "/")
 
-    updated = update_post_data(db, post_id, data.title, data.content, image_url)
+    # DB 업데이트 호출
+    updated = update_post_data(db, post_id, title, content, image_url)
+
     if updated:
         return {"message": "게시글 수정 완료", "post": updated}
 
